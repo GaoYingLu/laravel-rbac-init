@@ -1,0 +1,95 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: gyl-dev
+ * Date: 2016/12/17
+ * Time: 下午2:00
+ */
+
+namespace App\Http\Controllers\Pc;
+
+use App\Http\Controllers\Controller;
+use App\Logics\UserLogic;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Redirect;
+
+class UserController extends Controller{
+
+    public function free(){
+
+        if( !$this->getUserId() ){
+
+            return Redirect::to('userLogin');
+
+        }
+
+        $data['title'] = '免费申请';
+
+        return view('pc.free', $data);
+
+    }
+
+    public function doFree( Request $request ){
+
+        if( !$this->getUserId() ){
+
+            return Redirect::to('userLogin');
+
+        }
+
+
+        $requestData = $request->all();
+
+        if( !isset($requestData['xinghao']) || empty($requestData['xinghao']) ){
+
+            return redirect()->back()->withInput($request->input())->with('error', '信息不完整,请重试!');
+
+        }
+
+        $str = '';
+
+        for( $i = 0; $i < count($requestData['xinghao']); $i++ ){
+
+            if( !empty($requestData['xinghao'][$i]) ){
+
+                $str .= '型号: '.$requestData['xinghao'][$i].';    
+                数量: '.$requestData['shuliang'][$i].';      
+                封装: '.$requestData['fengzhuang'][$i].';     
+                项目名称: '.$requestData['xiangmumingcheng'][$i].';     
+                最终应用: '.$requestData['zuizhongyingyong'][$i].';     
+                预计采购量: '.$requestData['caigouliang'][$i]."<br />";
+            }
+
+        }
+
+        if(isset($requestData['beizhu']) && !empty($requestData['beizhu'])){
+
+            $str .= $requestData['beizhu'];
+
+        }
+
+        $data['json_value'] = json_encode($str);
+
+        $data['user_id'] = $this->getUserId();
+
+        $data['order_id'] = str_random();
+
+        $logic = new UserLogic();
+
+        $result = $logic->doFree($data);
+
+        if( $result['status'] ){
+
+            return redirect()->back()->with('success', '申请成功,我们会尽快联系您!');
+
+        }else{
+
+            return redirect()->back()->withInput($request->input())->with('error', $result['msg']);
+
+        }
+        
+    }
+
+   
+
+}

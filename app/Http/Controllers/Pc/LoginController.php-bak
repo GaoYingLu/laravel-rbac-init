@@ -1,0 +1,60 @@
+<?php
+/**
+ * Created by PhpStorm.
+ * User: gyl-dev
+ * Date: 2016/12/17
+ * Time: 下午2:00
+ */
+
+namespace App\Http\Controllers\Pc;
+
+use App\Http\Controllers\Controller;
+use App\Logics\UserLogic;
+use Illuminate\Http\Request;
+use Session;
+
+class LoginController extends Controller{
+
+    public function index(){
+
+        $userId = $this->getUserId();
+
+        if( $userId ){
+
+            return redirect('/');
+
+        }
+
+        $data['title'] = '用户登陆';
+
+        return view('pc.login', $data);
+
+    }
+
+    public function doLogin( Request $request ){
+
+        $this->validate($request, [
+            'email'         => 'required|max:50',
+            'password'      => 'required|max:50',
+        ]);
+
+        $data = $request->all();
+
+        $logic = new UserLogic();
+
+        $result = $logic->login($data);
+
+        if( $result['status'] ){
+
+            return redirect('/');
+
+        }else{
+
+            return redirect()->back()->withInput($request->input())->with('error', $result['msg']);
+
+        }
+
+
+    }
+
+}
