@@ -171,7 +171,24 @@
 
     </div>
 
-    <script>
-        initSample(CKEDITOR.config.height=300, CKEDITOR.config.width=1300);
+    <script data-sample="1">
+        CKEDITOR.replace( 'editor', {
+            height: 300,
+            width:1300,
+
+            // Configure your file manager integration. This example uses CKFinder 3 for PHP.
+            //浏览服务器
+            filebrowserBrowseUrl: '/ckfinder/ckfinder.html',
+            filebrowserImageBrowseUrl: '/ckfinder/ckfinder.html?type=Images',
+            //上传
+            filebrowserUploadUrl: '/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Files',
+            filebrowserImageUploadUrl: '/uploadImg?command=QuickUpload&type=Images'
+        } );
     </script>
+
+    {{--<script>
+        initSample(CKEDITOR.config.height=300, CKEDITOR.config.width=1300);
+        CKEDITOR.config.extraPlugins = 'uploadimage';
+        CKEDITOR.config.uploadUrl = '/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Files&responseType=json';
+    </script>--}}
 @endsection
