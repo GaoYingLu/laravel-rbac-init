@@ -20,14 +20,6 @@ class ExceptionCodeModel
         //BASE 100
         EXP_MODEL_BASE                                      = 101001000,
 
-        //文章
-        EXP_MODEL_ARTICLE                                   = 101002000,
-        EXP_MODEL_ARTICLE_CONTENT                           = 101003000,
-        EXP_MODEL_ARTICLE_EXTEND                            = 101004000,
-        EXP_MODEL_ARTICLE_CATEGORY                          = 101005000,
-        EXP_MODEL_USER_FREE                                 = 101006000,
-        EXP_MODEL_REPLY                                     = 101007000,
-
 
         //最后一个，新增请在这个上面添加
         EXP_LAST_ITEM                                       = 100000000;
