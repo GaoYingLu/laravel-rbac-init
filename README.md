@@ -24,7 +24,7 @@
 - cd laravel-rbac-init
 - 执行 `git clone https://github.com/Laradock/laradock.git`
 - cp env-example .env
-- 执行 `docker-composer up -d nginx mysql redis`
+- 执行 `docker-compose up -d nginx mysql redis`
 - 如果你想安装更多服务，https://github.com/Laradock/laradock.git 这里面有全部的，按需安装；默认的我使用了http://dev.laravel-rbac.com 这个域名，如果你要更换，请在laradock/nginx/sites/default.conf 修改 server_name;（记得添加你本地的 host 记录指向）
 - 查看是否启动了至少4个容器。php nginx  mysql redis 还有一个工作空间(laradock_workspace_1);
 - 进入容器，执行 `docker exec -it laradock_workspace_1` 这个容器其实就是你的项目目录
