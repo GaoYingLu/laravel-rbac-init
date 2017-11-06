@@ -30,12 +30,14 @@
 - 进入容器，执行 `docker exec -it laradock_workspace_1` 这个容器其实就是你的项目目录
 - 配置 **.local.env** 中数据库连接信息
 ---
+```
 DB_CONNECTION=mysql
 DB_HOST=mysql
 DB_PORT=3306
 DB_DATABASE=laravel_rbac
 DB_USERNAME=root
 DB_PASSWORD=root
+```
 ---
 - 执行 `php artisan db:seed`
 - 访问: http://dev.laravel-rbac.com/admin/login
