@@ -274,7 +274,7 @@
         </div><!-- headerbar -->
 
 
-        
+
 
         @yield('content')
 
