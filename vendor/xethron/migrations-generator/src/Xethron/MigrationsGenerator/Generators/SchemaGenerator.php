@@ -1,6 +1,6 @@
 <?php namespace Xethron\MigrationsGenerator\Generators;
 
-use DB;
+use Illuminate\Support\Facades\DB;
 
 class SchemaGenerator {
 
@@ -40,6 +40,8 @@ class SchemaGenerator {
 	public function __construct($database, $ignoreIndexNames, $ignoreForeignKeyNames)
 	{
 		$connection = DB::connection($database)->getDoctrineConnection();
+		$connection->getDatabasePlatform()->registerDoctrineTypeMapping('json', 'text');
+		$connection->getDatabasePlatform()->registerDoctrineTypeMapping('jsonb', 'text');
 		$connection->getDatabasePlatform()->registerDoctrineTypeMapping('enum', 'string');
 		$connection->getDatabasePlatform()->registerDoctrineTypeMapping('bit', 'boolean');
 

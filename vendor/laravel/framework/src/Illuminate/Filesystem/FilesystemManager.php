@@ -75,6 +75,18 @@ class FilesystemManager implements FactoryContract
     }
 
     /**
+     * Get a default cloud filesystem instance.
+     *
+     * @return \Illuminate\Contracts\Filesystem\Filesystem
+     */
+    public function cloud()
+    {
+        $name = $this->getDefaultCloudDriver();
+
+        return $this->disks[$name] = $this->get($name);
+    }
+
+    /**
      * Attempt to get the disk from the local cache.
      *
      * @param  string  $name
@@ -175,8 +187,10 @@ class FilesystemManager implements FactoryContract
 
         $root = isset($s3Config['root']) ? $s3Config['root'] : null;
 
+        $options = isset($config['options']) ? $config['options'] : [];
+
         return $this->adapt($this->createFlysystem(
-            new S3Adapter(new S3Client($s3Config), $s3Config['bucket'], $root), $config
+            new S3Adapter(new S3Client($s3Config), $s3Config['bucket'], $root, $options), $config
         ));
     }
 
@@ -209,8 +223,10 @@ class FilesystemManager implements FactoryContract
             'username' => $config['username'], 'apiKey' => $config['key'],
         ]);
 
+        $root = isset($config['root']) ? $config['root'] : null;
+
         return $this->adapt($this->createFlysystem(
-            new RackspaceAdapter($this->getRackspaceContainer($client, $config)), $config
+            new RackspaceAdapter($this->getRackspaceContainer($client, $config), $root), $config
         ));
     }
 
@@ -235,11 +251,11 @@ class FilesystemManager implements FactoryContract
      *
      * @param  \League\Flysystem\AdapterInterface  $adapter
      * @param  array  $config
-     * @return \Leage\Flysystem\FlysystemInterface
+     * @return \League\Flysystem\FlysystemInterface
      */
     protected function createFlysystem(AdapterInterface $adapter, array $config)
     {
-        $config = Arr::only($config, ['visibility']);
+        $config = Arr::only($config, ['visibility', 'disable_asserts']);
 
         return new Flysystem($adapter, count($config) > 0 ? $config : null);
     }
@@ -274,6 +290,16 @@ class FilesystemManager implements FactoryContract
     public function getDefaultDriver()
     {
         return $this->app['config']['filesystems.default'];
+    }
+
+    /**
+     * Get the default cloud driver name.
+     *
+     * @return string
+     */
+    public function getDefaultCloudDriver()
+    {
+        return $this->app['config']['filesystems.cloud'];
     }
 
     /**

@@ -158,7 +158,7 @@ class Process
             $this->setEnv($env);
         }
 
-        $this->input = $input;
+        $this->setInput($input);
         $this->setTimeout($timeout);
         $this->useFileHandles = '\\' === DIRECTORY_SEPARATOR;
         $this->pty = false;
@@ -240,9 +240,6 @@ class Process
      * The callback receives the type of output (out or err) and some bytes from
      * the output in real-time while writing the standard input to the process.
      * It allows to have feedback from the independent process during execution.
-     * If there is no callback passed, the wait() method can be called
-     * with true as a second parameter then the callback will get all data occurred
-     * in (and since) the start call.
      *
      * @param callable|null $callback A PHP callback to run whenever there is some
      *                                output available on STDOUT or STDERR
@@ -363,8 +360,7 @@ class Process
         do {
             $this->checkTimeout();
             $running = '\\' === DIRECTORY_SEPARATOR ? $this->isRunning() : $this->processPipes->areOpen();
-            $close = '\\' !== DIRECTORY_SEPARATOR || !$running;
-            $this->readPipes(true, $close);
+            $this->readPipes($running, '\\' !== DIRECTORY_SEPARATOR || !$running);
         } while ($running);
 
         while ($this->isRunning()) {
@@ -466,15 +462,13 @@ class Process
      */
     public function getOutput()
     {
-        if ($this->outputDisabled) {
-            throw new LogicException('Output has been disabled.');
+        $this->readPipesForOutput(__FUNCTION__);
+
+        if (false === $ret = stream_get_contents($this->stdout, -1, 0)) {
+            return '';
         }
 
-        $this->requireProcessIsStarted(__FUNCTION__);
-
-        $this->readPipes(false, '\\' === DIRECTORY_SEPARATOR ? !$this->processInformation['running'] : true);
-
-        return $this->stdout;
+        return $ret;
     }
 
     /**
@@ -483,24 +477,21 @@ class Process
      * In comparison with the getOutput method which always return the whole
      * output, this one returns the new output since the last call.
      *
+     * @return string The process output since the last call
+     *
      * @throws LogicException in case the output has been disabled
      * @throws LogicException In case the process is not started
-     *
-     * @return string The process output since the last call
      */
     public function getIncrementalOutput()
     {
-        $this->requireProcessIsStarted(__FUNCTION__);
+        $this->readPipesForOutput(__FUNCTION__);
 
-        $data = $this->getOutput();
-
-        $latest = substr($data, $this->incrementalOutputOffset);
+        $latest = stream_get_contents($this->stdout, -1, $this->incrementalOutputOffset);
+        $this->incrementalOutputOffset = ftell($this->stdout);
 
         if (false === $latest) {
             return '';
         }
-
-        $this->incrementalOutputOffset = strlen($data);
 
         return $latest;
     }
@@ -512,7 +503,8 @@ class Process
      */
     public function clearOutput()
     {
-        $this->stdout = '';
+        ftruncate($this->stdout, 0);
+        fseek($this->stdout, 0);
         $this->incrementalOutputOffset = 0;
 
         return $this;
@@ -528,15 +520,13 @@ class Process
      */
     public function getErrorOutput()
     {
-        if ($this->outputDisabled) {
-            throw new LogicException('Output has been disabled.');
+        $this->readPipesForOutput(__FUNCTION__);
+
+        if (false === $ret = stream_get_contents($this->stderr, -1, 0)) {
+            return '';
         }
 
-        $this->requireProcessIsStarted(__FUNCTION__);
-
-        $this->readPipes(false, '\\' === DIRECTORY_SEPARATOR ? !$this->processInformation['running'] : true);
-
-        return $this->stderr;
+        return $ret;
     }
 
     /**
@@ -546,24 +536,21 @@ class Process
      * whole error output, this one returns the new error output since the last
      * call.
      *
+     * @return string The process error output since the last call
+     *
      * @throws LogicException in case the output has been disabled
      * @throws LogicException In case the process is not started
-     *
-     * @return string The process error output since the last call
      */
     public function getIncrementalErrorOutput()
     {
-        $this->requireProcessIsStarted(__FUNCTION__);
+        $this->readPipesForOutput(__FUNCTION__);
 
-        $data = $this->getErrorOutput();
-
-        $latest = substr($data, $this->incrementalErrorOutputOffset);
+        $latest = stream_get_contents($this->stderr, -1, $this->incrementalErrorOutputOffset);
+        $this->incrementalErrorOutputOffset = ftell($this->stderr);
 
         if (false === $latest) {
             return '';
         }
-
-        $this->incrementalErrorOutputOffset = strlen($data);
 
         return $latest;
     }
@@ -575,7 +562,8 @@ class Process
      */
     public function clearErrorOutput()
     {
-        $this->stderr = '';
+        ftruncate($this->stderr, 0);
+        fseek($this->stderr, 0);
         $this->incrementalErrorOutputOffset = 0;
 
         return $this;
@@ -605,7 +593,7 @@ class Process
      * This method relies on the Unix exit code status standardization
      * and might not be relevant for other operating systems.
      *
-     * @return null|string A string representation for the exit status code, null if the Process is not terminated.
+     * @return null|string A string representation for the exit status code, null if the Process is not terminated
      *
      * @see http://tldp.org/LDP/abs/html/exitcodes.html
      * @see http://en.wikipedia.org/wiki/Unix_signal
@@ -780,8 +768,12 @@ class Process
             }
         }
 
-        $this->updateStatus(false);
-        if ($this->processInformation['running']) {
+        if ($this->isRunning()) {
+            if (isset($this->fallbackStatus['pid'])) {
+                unset($this->fallbackStatus['pid']);
+
+                return $this->stop(0, $signal);
+            }
             $this->close();
         }
 
@@ -791,23 +783,33 @@ class Process
     /**
      * Adds a line to the STDOUT stream.
      *
+     * @internal
+     *
      * @param string $line The line to append
      */
     public function addOutput($line)
     {
         $this->lastOutputTime = microtime(true);
-        $this->stdout .= $line;
+
+        fseek($this->stdout, 0, SEEK_END);
+        fwrite($this->stdout, $line);
+        fseek($this->stdout, $this->incrementalOutputOffset);
     }
 
     /**
      * Adds a line to the STDERR stream.
+     *
+     * @internal
      *
      * @param string $line The line to append
      */
     public function addErrorOutput($line)
     {
         $this->lastOutputTime = microtime(true);
-        $this->stderr .= $line;
+
+        fseek($this->stderr, 0, SEEK_END);
+        fwrite($this->stderr, $line);
+        fseek($this->stderr, $this->incrementalErrorOutputOffset);
     }
 
     /**
@@ -879,7 +881,7 @@ class Process
      *
      * @param int|float|null $timeout The timeout in seconds
      *
-     * @return self The current Process instance.
+     * @return self The current Process instance
      *
      * @throws LogicException           if the output is disabled
      * @throws InvalidArgumentException if the timeout is negative
@@ -1047,7 +1049,7 @@ class Process
             throw new LogicException('Input can not be set while the process is running.');
         }
 
-        $this->input = ProcessUtils::validateInput(sprintf('%s::%s', __CLASS__, __FUNCTION__), $input);
+        $this->input = ProcessUtils::validateInput(__METHOD__, $input);
 
         return $this;
     }
@@ -1190,7 +1192,7 @@ class Process
             $this->processPipes = UnixPipes::create($this, $this->input);
         }
 
-        return $this->processPipes->getDescriptors($this->outputDisabled);
+        return $this->processPipes->getDescriptors();
     }
 
     /**
@@ -1224,7 +1226,7 @@ class Process
     /**
      * Updates the status of the process, reads pipes.
      *
-     * @param bool $blocking Whether to use a blocking read call.
+     * @param bool $blocking Whether to use a blocking read call
      */
     protected function updateStatus($blocking)
     {
@@ -1233,14 +1235,15 @@ class Process
         }
 
         $this->processInformation = proc_get_status($this->process);
+        $running = $this->processInformation['running'];
 
-        $this->readPipes($blocking, '\\' === DIRECTORY_SEPARATOR ? !$this->processInformation['running'] : true);
+        $this->readPipes($running && $blocking, '\\' !== DIRECTORY_SEPARATOR || !$running);
 
         if ($this->fallbackStatus && $this->enhanceSigchildCompatibility && $this->isSigchildEnabled()) {
             $this->processInformation = $this->fallbackStatus + $this->processInformation;
         }
 
-        if (!$this->processInformation['running']) {
+        if (!$running) {
             $this->close();
         }
     }
@@ -1264,6 +1267,24 @@ class Process
         phpinfo(INFO_GENERAL);
 
         return self::$sigchild = false !== strpos(ob_get_clean(), '--enable-sigchild');
+    }
+
+    /**
+     * Reads pipes for the freshest output.
+     *
+     * @param $caller The name of the method that needs fresh outputs
+     *
+     * @throws LogicException in case output has been disabled or process is not started
+     */
+    private function readPipesForOutput($caller)
+    {
+        if ($this->outputDisabled) {
+            throw new LogicException('Output has been disabled.');
+        }
+
+        $this->requireProcessIsStarted($caller);
+
+        $this->updateStatus(false);
     }
 
     /**
@@ -1291,8 +1312,8 @@ class Process
     /**
      * Reads pipes, executes callback.
      *
-     * @param bool $blocking Whether to use blocking calls or not.
-     * @param bool $close    Whether to close file handles or not.
+     * @param bool $blocking Whether to use blocking calls or not
+     * @param bool $close    Whether to close file handles or not
      */
     private function readPipes($blocking, $close)
     {
@@ -1300,13 +1321,10 @@ class Process
 
         $callback = $this->callback;
         foreach ($result as $type => $data) {
-            if (3 === $type) {
-                $this->fallbackStatus['running'] = false;
-                if (!isset($this->fallbackStatus['signaled'])) {
-                    $this->fallbackStatus['exitcode'] = (int) $data;
-                }
-            } else {
+            if (3 !== $type) {
                 $callback($type === self::STDOUT ? self::OUT : self::ERR, $data);
+            } elseif (!isset($this->fallbackStatus['signaled'])) {
+                $this->fallbackStatus['exitcode'] = (int) $data;
             }
         }
     }
@@ -1353,8 +1371,8 @@ class Process
         $this->exitcode = null;
         $this->fallbackStatus = array();
         $this->processInformation = null;
-        $this->stdout = null;
-        $this->stderr = null;
+        $this->stdout = fopen('php://temp/maxmemory:'.(1024 * 1024), 'wb+');
+        $this->stderr = fopen('php://temp/maxmemory:'.(1024 * 1024), 'wb+');
         $this->process = null;
         $this->latestSignal = null;
         $this->status = self::STATUS_READY;
@@ -1376,7 +1394,7 @@ class Process
      */
     private function doSignal($signal, $throwException)
     {
-        if (!$this->isRunning()) {
+        if (null === $pid = $this->getPid()) {
             if ($throwException) {
                 throw new LogicException('Can not send signal on a non running process.');
             }
@@ -1385,7 +1403,7 @@ class Process
         }
 
         if ('\\' === DIRECTORY_SEPARATOR) {
-            exec(sprintf('taskkill /F /T /PID %d 2>&1', $this->getPid()), $output, $exitCode);
+            exec(sprintf('taskkill /F /T /PID %d 2>&1', $pid), $output, $exitCode);
             if ($exitCode && $this->isRunning()) {
                 if ($throwException) {
                     throw new RuntimeException(sprintf('Unable to kill the process (%s).', implode(' ', $output)));
@@ -1397,8 +1415,8 @@ class Process
             if (!$this->enhanceSigchildCompatibility || !$this->isSigchildEnabled()) {
                 $ok = @proc_terminate($this->process, $signal);
             } elseif (function_exists('posix_kill')) {
-                $ok = @posix_kill($this->getPid(), $signal);
-            } elseif ($ok = proc_open(sprintf('kill -%d %d', $signal, $this->getPid()), array(2 => array('pipe', 'w')), $pipes)) {
+                $ok = @posix_kill($pid, $signal);
+            } elseif ($ok = proc_open(sprintf('kill -%d %d', $signal, $pid), array(2 => array('pipe', 'w')), $pipes)) {
                 $ok = false === fgets($pipes[2]);
             }
             if (!$ok) {
@@ -1421,7 +1439,7 @@ class Process
     /**
      * Ensures the process is running or terminated, throws a LogicException if the process has a not started.
      *
-     * @param string $functionName The function name that was called.
+     * @param string $functionName The function name that was called
      *
      * @throws LogicException If the process has not run.
      */
@@ -1435,7 +1453,7 @@ class Process
     /**
      * Ensures the process is terminated, throws a LogicException if the process has a status different than `terminated`.
      *
-     * @param string $functionName The function name that was called.
+     * @param string $functionName The function name that was called
      *
      * @throws LogicException If the process is not yet terminated.
      */

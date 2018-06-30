@@ -8,7 +8,8 @@ use Prettus\Repository\Generators\Migrations\SchemaParser;
  * Class ModelGenerator
  * @package Prettus\Repository\Generators
  */
-class ModelGenerator extends Generator {
+class ModelGenerator extends Generator
+{
 
     /**
      * Get stub name.
@@ -38,17 +39,6 @@ class ModelGenerator extends Generator {
     }
 
     /**
-     * Get base path of destination file.
-     *
-     * @return string
-     */
-
-    public function getBasePath()
-    {
-        return config('repository.generator.basePath', app_path());
-    }
-
-    /**
      * Get destination path for generated file.
      *
      * @return string
@@ -56,6 +46,17 @@ class ModelGenerator extends Generator {
     public function getPath()
     {
         return $this->getBasePath() . '/' . parent::getConfigGeneratorClassPath($this->getPathConfigNode(), true) . '/' . $this->getName() . '.php';
+    }
+
+    /**
+     * Get base path of destination file.
+     *
+     * @return string
+     */
+
+    public function getBasePath()
+    {
+        return config('repository.generator.basePath', app()->path());
     }
 
     /**
@@ -71,6 +72,25 @@ class ModelGenerator extends Generator {
     }
 
     /**
+     * Get the fillable attributes.
+     *
+     * @return string
+     */
+    public function getFillable()
+    {
+        if (!$this->fillable) {
+            return '[]';
+        }
+        $results = '[' . PHP_EOL;
+
+        foreach ($this->getSchemaParser()->toArray() as $column => $value) {
+            $results .= "\t\t'{$column}'," . PHP_EOL;
+        }
+
+        return $results . "\t" . ']';
+    }
+
+    /**
      * Get schema parser.
      *
      * @return SchemaParser
@@ -78,22 +98,5 @@ class ModelGenerator extends Generator {
     public function getSchemaParser()
     {
         return new SchemaParser($this->fillable);
-    }
-
-    /**
-     * Get the fillable attributes.
-     *
-     * @return string
-     */
-    public function getFillable()
-    {
-        if ( ! $this->fillable) return '[]';
-        $results = '['.PHP_EOL;
-
-        foreach ($this->getSchemaParser()->toArray() as $column => $value)
-        {
-            $results .= "\t\t'{$column}',".PHP_EOL;
-        }
-        return $results . "\t" . ']';
     }
 }

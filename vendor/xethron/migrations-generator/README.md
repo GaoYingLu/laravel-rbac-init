@@ -8,39 +8,52 @@
 
 Generate Laravel Migrations from an existing database, including indexes and foreign keys!
 
-## Laravel 5
+## Upgrading to Laravel 5.4
 
-Thanks to @jamisonvalenta, you can now generate Migrations in Laravel 5!
+Please note that the Laravel 4 Generator edits have been moved to `https://github.com/xethron/Laravel-4-Generators.git` to update compatibility.
 
-For Laravel 5 installations, use version: "dev-l5" as follows:
-```json
-"require-dev": {
-    "xethron/migrations-generator": "dev-l5"
-}
+## Laravel 5 installation
+
+The recommended way to install this is through composer:
+
+```bash
+composer require --dev "xethron/migrations-generator"
 ```
-Also, due to a composer bug, you may need explicitly add the forked `way/generators` repo:
-```json
-"repositories": [
-    {
-        "type": "git",
-        "url": "git@github.com:jamisonvalenta/Laravel-4-Generators.git"
+
+Edit `config/app.php` and add this to providers section:
+
+```php
+Way\Generators\GeneratorsServiceProvider::class,
+Xethron\MigrationsGenerator\MigrationsGeneratorServiceProvider::class,
+```
+If you want this lib only for dev, you can add the following code to your `app/Providers/AppServiceProvider.php` file, within the `register()` method:
+
+```php
+public function register()
+{
+    if ($this->app->environment() !== 'production') {
+        $this->app->register(\Way\Generators\GeneratorsServiceProvider::class);
+        $this->app->register(\Xethron\MigrationsGenerator\MigrationsGeneratorServiceProvider::class);
     }
-]
-```
-For those who use `way/generators`: you will not be able to resolve a package version for both this package and `way/generators`. `composer update` without requiring `way/generators` to generate your migrations. Then remove `xethron/migrations-generator`, add your preferred version, and `composer update` again.  
-
-## Install
-
-Edit your composer.json file to require `xethron/migrations-generator` and run `composer update`
-```json
-"require-dev": {
-    "xethron/migrations-generator": "dev-master"
+    // ...
 }
 ```
 
-Next, add the following service provider:
+Notes:
+* Thanks to @jamisonvalenta, you can now generate Migrations in Laravel 5!
+* `feature/laravel-five-stable` was forked from `way/generators` `3.0.3` and was made Laravel `5.0` ready. Jeffrey Way has discontinued support for Laravel 5, so the other `artisan generate:` commands may not have been made `5.0` compatible.  Investigate the `artisan make:` commands for substitutes, contribute to Laravel to extend generation support, or fix it and submit a PR to `jamisonvalenta/feature/laravel-five-stable`.
 
+## Laravel 4 installation
+
+Run the following composer command:
+
+```bash
+composer require --dev "xethron/migrations-generator:~1.3.0"
 ```
+
+Next, add the following service providers:
+
+```php
 'Way\Generators\GeneratorsServiceProvider',
 'Xethron\MigrationsGenerator\MigrationsGeneratorServiceProvider',
 ```
@@ -64,6 +77,23 @@ Check out Chung Tran's blog post for a quick step by step introduction: [Generat
 ## Changelog
 
 Changelog for Laravel Migrations Generator
+
+### 20 November 2016: v2.0.0
+* Support for Laravel 5
+
+### 20 November 2016: v1.3.0
+* Add options --defaultIndexNames and --defaultFKNames to use Laravel's default generated names
+* --no-interaction support
+* Migrate table field comments
+* Add connection to migrations if its not the default
+* Bugfix:
+  * --ignore doesn't ignoring the first table in the list
+  * Remove backticks from index names #17
+  * Drop foreign keys used incorrect key name #34
+  * Remove table prefix from migrations
+  * Escape table names and args
+  * Map JSON columns as text
+  * Boolean default results in empty string
 
 ### 25 July: v1.2.2
 * Support for Laravel 4.2

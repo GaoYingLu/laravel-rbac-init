@@ -7,23 +7,29 @@ namespace Composer\Autoload;
 class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
 {
     public static $files = array (
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '1d1b89d124cc9cb8219922c9d5569199' => __DIR__ . '/..' . '/hamcrest/hamcrest-php/hamcrest/Hamcrest.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '667aeda72477189d0494fecd327c3641' => __DIR__ . '/..' . '/symfony/var-dumper/Resources/functions/dump.php',
         'bd9634f2d41831496de0d3dfe4c94881' => __DIR__ . '/..' . '/symfony/polyfill-php56/bootstrap.php',
         '2c102faa651ef8ea5874edb585946bce' => __DIR__ . '/..' . '/swiftmailer/swiftmailer/lib/swift_required.php',
-        'e7223560d890eab89cda23685e711e2c' => __DIR__ . '/..' . '/psy/psysh/src/Psy/functions.php',
         '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
-        'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
+        'e7223560d890eab89cda23685e711e2c' => __DIR__ . '/..' . '/psy/psysh/src/Psy/functions.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
+        'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '7745382c92b7799bf1294b1f43023ba2' => __DIR__ . '/..' . '/tracy/tracy/src/shortcuts.php',
+        'a11c9c679106fb6eebafe1b18bae4f08' => __DIR__ . '/..' . '/recca0120/terminal/src/polyfill.php',
         'f0906e6318348a765ffb6eb24e0d0938' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Foundation/helpers.php',
         '58571171fd5812e6e447dce228f52f4d' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/helpers.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
         '4a1f389d6ce373bda9e57857d3b61c84' => __DIR__ . '/..' . '/barryvdh/laravel-debugbar/src/helpers.php',
+        '7becae842ee3fa18ac51ce7ea741b0c4' => __DIR__ . '/..' . '/recca0120/laravel-tracy/src/polyfill.php',
     );
 
     public static $prefixLengthsPsr4 = array (
+        'p' => 
+        array (
+            'phpDocumentor\\Reflection\\' => 25,
+        ),
         'Z' => 
         array (
             'Zizaco\\Entrust\\' => 15,
@@ -35,6 +41,12 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         'X' => 
         array (
             'XdgBaseDir\\' => 11,
+        ),
+        'W' => 
+        array (
+            'Webmozart\\PathUtil\\' => 19,
+            'Webmozart\\Glob\\' => 15,
+            'Webmozart\\Assert\\' => 17,
         ),
         'T' => 
         array (
@@ -63,12 +75,15 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         ),
         'R' => 
         array (
+            'Recca0120\\Terminal\\' => 19,
             'Recca0120\\LaravelTracy\\' => 23,
         ),
         'P' => 
         array (
             'Psy\\' => 4,
+            'Psr\\Log\\' => 8,
             'Psr\\Http\\Message\\' => 17,
+            'Prettus\\Validator\\' => 18,
             'Prettus\\Repository\\' => 19,
             'PhpParser\\' => 10,
         ),
@@ -103,15 +118,17 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         array (
             'Dotenv\\' => 7,
             'Doctrine\\Instantiator\\' => 22,
+            'Doctrine\\Common\\Inflector\\' => 26,
             'Doctrine\\Common\\Cache\\' => 22,
+            'Doctrine\\Common\\Annotations\\' => 28,
             'Doctrine\\Common\\' => 16,
             'DebugBar\\' => 9,
             'DaveJamesMiller\\Breadcrumbs\\' => 28,
         ),
         'C' => 
         array (
+            'Cron\\' => 5,
             'ClassPreloader\\' => 15,
-            'Carbon\\' => 7,
         ),
         'B' => 
         array (
@@ -124,6 +141,12 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
     );
 
     public static $prefixDirsPsr4 = array (
+        'phpDocumentor\\Reflection\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/phpdocumentor/reflection-common/src',
+            1 => __DIR__ . '/..' . '/phpdocumentor/type-resolver/src',
+            2 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
+        ),
         'Zizaco\\Entrust\\' => 
         array (
             0 => __DIR__ . '/..' . '/zizaco/entrust/src/Entrust',
@@ -135,6 +158,18 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         'XdgBaseDir\\' => 
         array (
             0 => __DIR__ . '/..' . '/dnoegel/php-xdg-base-dir/src',
+        ),
+        'Webmozart\\PathUtil\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/webmozart/path-util/src',
+        ),
+        'Webmozart\\Glob\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/webmozart/glob/src',
+        ),
+        'Webmozart\\Assert\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/webmozart/assert/src',
         ),
         'Thetispro\\Setting\\' => 
         array (
@@ -212,6 +247,10 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         array (
             0 => __DIR__ . '/..' . '/jeremeamia/SuperClosure/src',
         ),
+        'Recca0120\\Terminal\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/recca0120/terminal/src',
+        ),
         'Recca0120\\LaravelTracy\\' => 
         array (
             0 => __DIR__ . '/..' . '/recca0120/laravel-tracy/src',
@@ -220,9 +259,17 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         array (
             0 => __DIR__ . '/..' . '/psy/psysh/src/Psy',
         ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
+        ),
         'Psr\\Http\\Message\\' => 
         array (
             0 => __DIR__ . '/..' . '/psr/http-message/src',
+        ),
+        'Prettus\\Validator\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/prettus/laravel-validation/src/Prettus/Validator',
         ),
         'Prettus\\Repository\\' => 
         array (
@@ -276,9 +323,17 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         array (
             0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
         ),
+        'Doctrine\\Common\\Inflector\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/doctrine/inflector/lib/Doctrine/Common/Inflector',
+        ),
         'Doctrine\\Common\\Cache\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/cache/lib/Doctrine/Common/Cache',
+        ),
+        'Doctrine\\Common\\Annotations\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/doctrine/annotations/lib/Doctrine/Common/Annotations',
         ),
         'Doctrine\\Common\\' => 
         array (
@@ -292,13 +347,13 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         array (
             0 => __DIR__ . '/..' . '/davejamesmiller/laravel-breadcrumbs/src',
         ),
+        'Cron\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/mtdowling/cron-expression/src/Cron',
+        ),
         'ClassPreloader\\' => 
         array (
             0 => __DIR__ . '/..' . '/classpreloader/classpreloader/src',
-        ),
-        'Carbon\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/nesbot/carbon/src/Carbon',
         ),
         'Barryvdh\\Debugbar\\' => 
         array (
@@ -310,14 +365,11 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         ),
     );
 
+    public static $fallbackDirsPsr4 = array (
+        0 => __DIR__ . '/..' . '/nesbot/carbon/src',
+    );
+
     public static $prefixesPsr0 = array (
-        'p' => 
-        array (
-            'phpDocumentor' => 
-            array (
-                0 => __DIR__ . '/..' . '/phpdocumentor/reflection-docblock/src',
-            ),
-        ),
         'X' => 
         array (
             'Xethron\\MigrationsGenerator' => 
@@ -330,6 +382,7 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
             'Way\\Generators' => 
             array (
                 0 => __DIR__ . '/..' . '/way/generators/src',
+                1 => __DIR__ . '/..' . '/xethron/laravel-4-generators/src',
             ),
         ),
         'U' => 
@@ -341,10 +394,6 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         ),
         'P' => 
         array (
-            'Psr\\Log\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/psr/log',
-            ),
             'Prophecy\\' => 
             array (
                 0 => __DIR__ . '/..' . '/phpspec/prophecy/src',
@@ -378,24 +427,9 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
             array (
                 0 => __DIR__ . '/..' . '/doctrine/lexer/lib',
             ),
-            'Doctrine\\Common\\Inflector\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/doctrine/inflector/lib',
-            ),
             'Doctrine\\Common\\Collections\\' => 
             array (
                 0 => __DIR__ . '/..' . '/doctrine/collections/lib',
-            ),
-            'Doctrine\\Common\\Annotations\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/doctrine/annotations/lib',
-            ),
-        ),
-        'C' => 
-        array (
-            'Cron' => 
-            array (
-                0 => __DIR__ . '/..' . '/mtdowling/cron-expression/src',
             ),
         ),
     );
@@ -403,10 +437,6 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
     public static $classMap = array (
         'CreateAdminPasswordResetsTable' => __DIR__ . '/../..' . '/database/migrations/2016_01_18_071720_create_admin_password_resets_table.php',
         'CreateAdminUsers' => __DIR__ . '/../..' . '/database/migrations/2016_01_18_071439_create_admin_users.php',
-        'CreateArticleCategoryTable' => __DIR__ . '/../..' . '/database/migrations/2016_10_27_033921_create_article_category_table.php',
-        'CreateArticleContentTable' => __DIR__ . '/../..' . '/database/migrations/2016_10_27_033954_create_article_content_table.php',
-        'CreateArticleExtendTable' => __DIR__ . '/../..' . '/database/migrations/2016_11_17_052510_create_article_extend_table.php',
-        'CreateArticleTable' => __DIR__ . '/../..' . '/database/migrations/2016_10_27_031908_create_article_table.php',
         'CreatePasswordResetsTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_100000_create_password_resets_table.php',
         'CreateUsersTable' => __DIR__ . '/../..' . '/database/migrations/2014_10_12_000000_create_users_table.php',
         'DatabaseSeeder' => __DIR__ . '/../..' . '/database/seeds/DatabaseSeeder.php',
@@ -486,6 +516,13 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         'Hamcrest\\Xml\\HasXPath' => __DIR__ . '/..' . '/hamcrest/hamcrest-php/hamcrest/Hamcrest/Xml/HasXPath.php',
         'IlluminateQueueClosure' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Queue/IlluminateQueueClosure.php',
         'PDF417' => __DIR__ . '/..' . '/tecnickcom/tcpdf/include/barcodes/pdf417.php',
+        'PHPUnit\\Framework\\Assert' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/Assert.php',
+        'PHPUnit\\Framework\\AssertionFailedError' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/AssertionFailedError.php',
+        'PHPUnit\\Framework\\BaseTestListener' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/BaseTestListener.php',
+        'PHPUnit\\Framework\\Test' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/Test.php',
+        'PHPUnit\\Framework\\TestCase' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/TestCase.php',
+        'PHPUnit\\Framework\\TestListener' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/TestListener.php',
+        'PHPUnit\\Framework\\TestSuite' => __DIR__ . '/..' . '/phpunit/phpunit/src/ForwardCompatibility/TestSuite.php',
         'PHPUnit_Exception' => __DIR__ . '/..' . '/phpunit/phpunit/src/Exception.php',
         'PHPUnit_Extensions_GroupTestSuite' => __DIR__ . '/..' . '/phpunit/phpunit/src/Extensions/GroupTestSuite.php',
         'PHPUnit_Extensions_PhptTestCase' => __DIR__ . '/..' . '/phpunit/phpunit/src/Extensions/PhptTestCase.php',
@@ -813,6 +850,7 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         'PHP_Token_NEW' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_NS_C' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_NS_SEPARATOR' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
+        'PHP_Token_NULLSAFE_OBJECT_OPERATOR' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_NUM_STRING' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_OBJECT_CAST' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_OBJECT_OPERATOR' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
@@ -850,6 +888,7 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         'PHP_Token_STRING' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_STRING_CAST' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_STRING_VARNAME' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
+        'PHP_Token_SUPER' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_SWITCH' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_Stream' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token/Stream.php',
         'PHP_Token_Stream_CachingFactory' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token/Stream/CachingFactory.php',
@@ -864,6 +903,7 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         'PHP_Token_UNSET' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_UNSET_CAST' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_USE' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
+        'PHP_Token_USE_FUNCTION' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_VAR' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_VARIABLE' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
         'PHP_Token_WHERE' => __DIR__ . '/..' . '/phpunit/php-token-stream/src/Token.php',
@@ -934,6 +974,8 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         'Text_Template' => __DIR__ . '/..' . '/phpunit/php-text-template/src/Template.php',
         'Tracy\\Bar' => __DIR__ . '/..' . '/tracy/tracy/src/Tracy/Bar.php',
         'Tracy\\BlueScreen' => __DIR__ . '/..' . '/tracy/tracy/src/Tracy/BlueScreen.php',
+        'Tracy\\Bridges\\Nette\\Bridge' => __DIR__ . '/..' . '/tracy/tracy/src/Bridges/Nette/Bridge.php',
+        'Tracy\\Bridges\\Nette\\MailSender' => __DIR__ . '/..' . '/tracy/tracy/src/Bridges/Nette/MailSender.php',
         'Tracy\\Bridges\\Nette\\TracyExtension' => __DIR__ . '/..' . '/tracy/tracy/src/Bridges/Nette/TracyExtension.php',
         'Tracy\\Debugger' => __DIR__ . '/..' . '/tracy/tracy/src/Tracy/Debugger.php',
         'Tracy\\DefaultBarPanel' => __DIR__ . '/..' . '/tracy/tracy/src/Tracy/DefaultBarPanel.php',
@@ -953,6 +995,7 @@ class ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf::$prefixDirsPsr4;
+            $loader->fallbackDirsPsr4 = ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf::$fallbackDirsPsr4;
             $loader->prefixesPsr0 = ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf::$prefixesPsr0;
             $loader->classMap = ComposerStaticInit27f530bf70d61cb8e25fd8f870b88dbf::$classMap;
 

@@ -1,60 +1,88 @@
 <?php namespace Barryvdh\Debugbar\Middleware;
 
+use Error;
 use Closure;
+use Exception;
+use Illuminate\Http\Request;
+use Barryvdh\Debugbar\LaravelDebugbar;
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Contracts\Foundation\Application;
+use Symfony\Component\Debug\Exception\FatalThrowableError;
 
-class Debugbar {
+class Debugbar
+{
+    /**
+     * The App container
+     *
+     * @var Container
+     */
+    protected $container;
 
     /**
-     * The Laravel Application
+     * The DebugBar instance
      *
-     * @var Application
+     * @var LaravelDebugbar
      */
-    protected $app;
-
-    /**
-     * The Exception Handler
-     *
-     * @var ExceptionHandler
-     */
-    protected $exceptionHandler;
+    protected $debugbar;
 
     /**
      * Create a new middleware instance.
      *
-     * @param  Application $app
-     * @param  ExceptionHandler $exceptionHandler
+     * @param  Container $container
+     * @param  LaravelDebugbar $debugbar
      */
-    public function __construct(Application $app, ExceptionHandler $exceptionHandler)
+    public function __construct(Container $container, LaravelDebugbar $debugbar)
     {
-        $this->app = $app;
-        $this->exceptionHandler = $exceptionHandler;
+        $this->container = $container;
+        $this->debugbar = $debugbar;
     }
 
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
+     * @param  Request  $request
+     * @param  Closure  $next
      * @return mixed
      */
     public function handle($request, Closure $next)
     {
-        /** @var \Barryvdh\Debugbar\LaravelDebugbar $debugbar */
-        $debugbar = $this->app['debugbar'];
-
         try {
             /** @var \Illuminate\Http\Response $response */
             $response = $next($request);
-        } catch (\Exception $e) {
-            $debugbar->addException($e);
-
-            $this->exceptionHandler->report($e);
-            $response = $this->exceptionHandler->render($request, $e);
+        } catch (Exception $e) {
+            $response = $this->handleException($request, $e);
+        } catch (Error $error) {
+            $e = new FatalThrowableError($error);
+            $response = $this->handleException($request, $e);
         }
 
-        return $debugbar->modifyResponse($request, $response);
+        // Modify the response to add the Debugbar
+        $this->debugbar->modifyResponse($request, $response);
 
+        return $response;
+
+    }
+
+    /**
+     * Handle the given exception.
+     *
+     * (Copy from Illuminate\Routing\Pipeline by Taylor Otwell)
+     *
+     * @param $passable
+     * @param  Exception $e
+     * @return mixed
+     * @throws Exception
+     */
+    protected function handleException($passable, Exception $e)
+    {
+        if (! $this->container->bound(ExceptionHandler::class) || ! $passable instanceof Request) {
+            throw $e;
+        }
+
+        $handler = $this->container->make(ExceptionHandler::class);
+
+        $handler->report($e);
+
+        return $handler->render($passable, $e);
     }
 }

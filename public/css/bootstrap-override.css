@@ -81,6 +81,10 @@ h4, .h4 {
    content: '';
 }
 
+.form-group .control-label {
+   margin-top: 3px;
+}
+
 .form-bordered .form-group {
    margin: 0;
    padding: 15px 0;
@@ -148,9 +152,9 @@ h4, .h4 {
    border-radius: 3px;
    line-height: 21px;
    -moz-transition: all 0.2s ease-out 0s;
-	-webkit-transition: all 0.2s ease-out 0s;
-	transition: all 0.2s ease-out 0s;
-   padding: 6px 15px; 
+   -webkit-transition: all 0.2s ease-out 0s;
+   transition: all 0.2s ease-out 0s;
+   padding: 9px 15px;
 }
 
 .btn:focus {
@@ -822,10 +826,6 @@ h4, .h4 {
    height: 46px;
 }
 
-.input-group-btn .btn {
-   line-height: 22px;
-}
-
 .dropdown-menu {
    -moz-border-radius: 3px;
    -webkit-border-radius: 3px;
@@ -1252,10 +1252,10 @@ small.media-desc {
 }
 
 .table {
-	background: #fcfcfc;
-	-moz-box-shadow: 0 3px 0 rgba(12,12,12,0.03);
+   -moz-box-shadow: 0 3px 0 rgba(12,12,12,0.03);
    -webkit-box-shadow: 0 3px 0 rgba(12,12,12,0.03);
    box-shadow: 0 3px 0 rgba(12,12,12,0.03);
+   background-color: #fcfcfc;
 }
 
 .table th {
@@ -1277,12 +1277,26 @@ small.media-desc {
 .table thead > tr > td,
 .table tbody > tr > td,
 .table tfoot > tr > td {
-	border-color: #eee;
+   border-color: #eee;
+   padding: 10px;
 }
 
 .table-striped > tbody > tr:nth-child(2n+1) > td,
 .table-striped > tbody > tr:nth-child(2n+1) > th {
 	background-color: #f5f5f5;
+}
+
+.table-bordered thead th:first-child {
+   border-left: 0;
+}
+
+.table thead .table-head-alt th {
+   text-transform: uppercase;
+   font-size: 12px; 
+}
+
+.table tbody tr td .progress {
+   margin: 0;
 }
 
 .modal-footer {

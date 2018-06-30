@@ -2,13 +2,14 @@
 
 namespace Faker\Provider;
 
-abstract class Text extends \Faker\Provider\Base
+abstract class Text extends Base
 {
     protected static $baseText = '';
     protected static $separator = ' ';
     protected static $separatorLen = 1;
-    protected $explodedText = null;
+    protected $explodedText;
     protected $consecutiveWords = array();
+    protected static $textStartsWithUppercase = true;
 
     /**
      * Generate a text string by the Markov chain algorithm.
@@ -38,7 +39,6 @@ abstract class Text extends \Faker\Provider\Base
         if ($indexSize > 5) {
             throw new \InvalidArgumentException('indexSize must be at most 5');
         }
-
 
         $words = $this->getConsecutiveWords($indexSize);
         $result = array();
@@ -127,11 +127,15 @@ abstract class Text extends \Faker\Provider\Base
 
     protected static function validStart($word)
     {
-        return preg_match('/^\p{Lu}/u', $word);
+        $isValid = true;
+        if (static::$textStartsWithUppercase) {
+            $isValid = preg_match('/^\p{Lu}/u', $word);
+        }
+        return $isValid;
     }
 
     protected static function appendEnd($text)
     {
-        return $text.'.';
+        return rtrim($text, ',— ').'.';
     }
 }

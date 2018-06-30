@@ -20,12 +20,20 @@
 namespace Doctrine\DBAL\Platforms;
 
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ColumnDiff;
 use Doctrine\DBAL\Schema\Identifier;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Types\Type;
+use function array_merge;
+use function count;
+use function current;
+use function explode;
+use function implode;
+use function sprintf;
+use function strpos;
+use function strtoupper;
 
 class DB2Platform extends AbstractPlatform
 {
@@ -59,7 +67,7 @@ class DB2Platform extends AbstractPlatform
      */
     public function initializeDoctrineTypeMappings()
     {
-        $this->doctrineTypeMapping = array(
+        $this->doctrineTypeMapping = [
             'smallint'      => 'smallint',
             'bigint'        => 'bigint',
             'integer'       => 'integer',
@@ -75,7 +83,21 @@ class DB2Platform extends AbstractPlatform
             'double'        => 'float',
             'real'          => 'float',
             'timestamp'     => 'datetime',
-        );
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function isCommentedDoctrineType(Type $doctrineType)
+    {
+        if ($doctrineType->getName() === Type::BOOLEAN) {
+            // We require a commented boolean type in order to distinguish between boolean and smallint
+            // as both (have to) map to the same native type.
+            return true;
+        }
+
+        return parent::isCommentedDoctrineType($doctrineType);
     }
 
     /**
@@ -179,14 +201,14 @@ class DB2Platform extends AbstractPlatform
     protected function getDateArithmeticIntervalExpression($date, $operator, $interval, $unit)
     {
         switch ($unit) {
-            case self::DATE_INTERVAL_UNIT_WEEK:
+            case DateIntervalUnit::WEEK:
                 $interval *= 7;
-                $unit = self::DATE_INTERVAL_UNIT_DAY;
+                $unit      = DateIntervalUnit::DAY;
                 break;
 
-            case self::DATE_INTERVAL_UNIT_QUARTER:
+            case DateIntervalUnit::QUARTER:
                 $interval *= 3;
-                $unit = self::DATE_INTERVAL_UNIT_MONTH;
+                $unit      = DateIntervalUnit::MONTH;
                 break;
         }
 
@@ -234,7 +256,9 @@ class DB2Platform extends AbstractPlatform
      */
     public function getTruncateTableSQL($tableName, $cascade = false)
     {
-        return 'TRUNCATE ' . $tableName . ' IMMEDIATE';
+        $tableIdentifier = new Identifier($tableName);
+
+        return 'TRUNCATE ' . $tableIdentifier->getQuotedName($this) . ' IMMEDIATE';
     }
 
     /**
@@ -249,6 +273,8 @@ class DB2Platform extends AbstractPlatform
      */
     public function getListTableColumnsSQL($table, $database = null)
     {
+        $table = $this->quoteStringLiteral($table);
+
         // We do the funky subquery and join syscat.columns.default this crazy way because
         // as of db2 v10, the column is CLOB(64k) and the distinct operator won't allow a CLOB,
         // it wants shorter stuff like a varchar.
@@ -268,6 +294,7 @@ class DB2Platform extends AbstractPlatform
                  c.scale,
                  c.identity,
                  tc.type AS tabconsttype,
+                 c.remarks AS comment,
                  k.colseq,
                  CASE
                  WHEN c.generated = 'D' THEN 1
@@ -281,7 +308,7 @@ class DB2Platform extends AbstractPlatform
                    ON (c.tabschema = k.tabschema
                        AND c.tabname = k.tabname
                        AND c.colname = k.colname)
-               WHERE UPPER(c.tabname) = UPPER('" . $table . "')
+               WHERE UPPER(c.tabname) = UPPER(" . $table . ")
                ORDER BY c.colno
              ) subq
           JOIN syscat.columns cols
@@ -313,6 +340,8 @@ class DB2Platform extends AbstractPlatform
      */
     public function getListTableIndexesSQL($table, $currentDatabase = null)
     {
+        $table = $this->quoteStringLiteral($table);
+
         return "SELECT   idx.INDNAME AS key_name,
                          idxcol.COLNAME AS column_name,
                          CASE
@@ -326,7 +355,7 @@ class DB2Platform extends AbstractPlatform
                 FROM     SYSCAT.INDEXES AS idx
                 JOIN     SYSCAT.INDEXCOLUSE AS idxcol
                 ON       idx.INDSCHEMA = idxcol.INDSCHEMA AND idx.INDNAME = idxcol.INDNAME
-                WHERE    idx.TABNAME = UPPER('" . $table . "')
+                WHERE    idx.TABNAME = UPPER(" . $table . ")
                 ORDER BY idxcol.COLSEQ ASC";
     }
 
@@ -335,6 +364,8 @@ class DB2Platform extends AbstractPlatform
      */
     public function getListTableForeignKeysSQL($table)
     {
+        $table = $this->quoteStringLiteral($table);
+
         return "SELECT   fkcol.COLNAME AS local_column,
                          fk.REFTABNAME AS foreign_table,
                          pkcol.COLNAME AS foreign_column,
@@ -358,7 +389,7 @@ class DB2Platform extends AbstractPlatform
                 ON       fk.REFKEYNAME = pkcol.CONSTNAME
                 AND      fk.REFTABSCHEMA = pkcol.TABSCHEMA
                 AND      fk.REFTABNAME = pkcol.TABNAME
-                WHERE    fk.TABNAME = UPPER('" . $table . "')
+                WHERE    fk.TABNAME = UPPER(" . $table . ")
                 ORDER BY fkcol.COLSEQ ASC";
     }
 
@@ -411,6 +442,14 @@ class DB2Platform extends AbstractPlatform
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function supportsCommentOnStatement()
+    {
+        return true;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getCurrentDateSQL()
@@ -446,13 +485,13 @@ class DB2Platform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function _getCreateTableSQL($tableName, array $columns, array $options = array())
+    protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
-        $indexes = array();
+        $indexes = [];
         if (isset($options['indexes'])) {
             $indexes = $options['indexes'];
         }
-        $options['indexes'] = array();
+        $options['indexes'] = [];
 
         $sqls = parent::_getCreateTableSQL($tableName, $columns, $options);
 
@@ -467,11 +506,11 @@ class DB2Platform extends AbstractPlatform
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        $sql = array();
-        $columnSql = array();
-        $commentsSQL = array();
+        $sql = [];
+        $columnSql = [];
+        $commentsSQL = [];
 
-        $queryParts = array();
+        $queryParts = [];
         foreach ($diff->addedColumns as $column) {
             if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
                 continue;
@@ -540,7 +579,7 @@ class DB2Platform extends AbstractPlatform
                 ' TO ' . $column->getQuotedName($this);
         }
 
-        $tableSql = array();
+        $tableSql = [];
 
         if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
             if (count($queryParts) > 0) {
@@ -613,10 +652,10 @@ class DB2Platform extends AbstractPlatform
         $alterClause = 'ALTER COLUMN ' . $columnDiff->column->getQuotedName($this);
 
         if ($column['columnDefinition']) {
-            return array($alterClause . ' ' . $column['columnDefinition']);
+            return [$alterClause . ' ' . $column['columnDefinition']];
         }
 
-        $clauses = array();
+        $clauses = [];
 
         if ($columnDiff->hasChanged('type') ||
             $columnDiff->hasChanged('length') ||
@@ -651,7 +690,7 @@ class DB2Platform extends AbstractPlatform
      */
     protected function getPreAlterTableIndexForeignKeySQL(TableDiff $diff)
     {
-        $sql = array();
+        $sql = [];
         $table = $diff->getName($this)->getQuotedName($this);
 
         foreach ($diff->removedIndexes as $remKey => $remIndex) {
@@ -667,8 +706,7 @@ class DB2Platform extends AbstractPlatform
 
                     $sql[] = $this->getCreateIndexSQL($addIndex, $table);
 
-                    unset($diff->removedIndexes[$remKey]);
-                    unset($diff->addedIndexes[$addKey]);
+                    unset($diff->removedIndexes[$remKey], $diff->addedIndexes[$addKey]);
 
                     break;
                 }
@@ -690,7 +728,7 @@ class DB2Platform extends AbstractPlatform
             $oldIndexName = $schema . '.' . $oldIndexName;
         }
 
-        return array('RENAME INDEX ' . $oldIndexName . ' TO ' . $index->getQuotedName($this));
+        return ['RENAME INDEX ' . $oldIndexName . ' TO ' . $index->getQuotedName($this)];
     }
 
     /**
@@ -740,18 +778,26 @@ class DB2Platform extends AbstractPlatform
      */
     protected function doModifyLimitQuery($query, $limit, $offset = null)
     {
-        if ($limit === null && $offset === null) {
+        $where = [];
+
+        if ($offset > 0) {
+            $where[] = sprintf('db22.DC_ROWNUM >= %d', $offset + 1);
+        }
+
+        if ($limit !== null) {
+            $where[] = sprintf('db22.DC_ROWNUM <= %d', $offset + $limit);
+        }
+
+        if (empty($where)) {
             return $query;
         }
 
-        $limit = (int) $limit;
-        $offset = (int) (($offset)?:0);
-
         // Todo OVER() needs ORDER BY data!
-        $sql = 'SELECT db22.* FROM (SELECT ROW_NUMBER() OVER() AS DC_ROWNUM, db21.* '.
-               'FROM (' . $query . ') db21) db22 WHERE db22.DC_ROWNUM BETWEEN ' . ($offset+1) .' AND ' . ($offset+$limit);
-
-        return $sql;
+        return sprintf(
+            'SELECT db22.* FROM (SELECT db21.*, ROW_NUMBER() OVER() AS DC_ROWNUM FROM (%s) db21) db22 WHERE %s',
+            $query,
+            implode(' AND ', $where)
+        );
     }
 
     /**
@@ -837,6 +883,6 @@ class DB2Platform extends AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Doctrine\DBAL\Platforms\Keywords\DB2Keywords';
+        return Keywords\DB2Keywords::class;
     }
 }

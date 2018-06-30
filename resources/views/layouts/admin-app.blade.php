@@ -13,6 +13,7 @@
     @section('css')
         <link href="{{ asset('css/style.default.css') }}" rel="stylesheet">
         <link href="{{ asset('css/jquery.datatables.css') }}" rel="stylesheet">
+        <link href="{{ asset('css/jquery.datatables.css') }}" rel="stylesheet">
         <link href="{{ asset('css/sweetalert.css') }}" rel="stylesheet">
         @show
 
@@ -22,7 +23,7 @@
         <script src="{{ asset('js/respond.min.js') }}"></script>
         <![endif]-->
         <script src="{{ asset('js/echarts.js') }}"></script>
-        <script language="javascript" type="text/javascript" src="{{ asset('My97DatePicker/WdatePicker.js') }}"></script>
+{{--        <script language="javascript" type="text/javascript" src="{{ asset('My97DatePicker/WdatePicker.js') }}"></script>--}}
 
 </head>
 
@@ -275,8 +276,8 @@
 
 
 
-
         @yield('content')
+
 
 
     </div><!-- mainpanel -->
@@ -316,7 +317,7 @@
     <script src="{{ asset('js/chosen.jquery.min.js') }}"></script>
     <script src="{{ asset('js/sweetalert.min.js') }}"></script>
     <script src="{{ asset('js/custom.js') }}"></script>
-    <script src="{{ asset('templateDemo/js/dashboard.js') }}"></script>
+    {{--<script src="{{ asset('templateDemo/js/dashboard.js') }}"></script>--}}
 
     {!! Toastr::render() !!}
 @show

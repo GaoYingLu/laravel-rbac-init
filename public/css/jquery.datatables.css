@@ -2,7 +2,13 @@
 .dataTables_wrapper {
 	position: relative;
 	clear: both;
-	*zoom: 1;
+	margin-bottom: 15px;
+}
+
+.dataTables_wrapper::after {
+	clear: both;
+	display: block;
+	content: '';
 }
 
 .dataTables_length {
@@ -22,6 +28,7 @@
 
 .dataTable {
 	display: inline-table;
+	margin-bottom: 15px;
 }
 
 .dataTable:before {
@@ -73,6 +80,49 @@
 .dataTables_paginate {
 	float: right;
 	text-align: right;
+}
+
+.dataTables_paginate a.paginate_button,
+.dataTables_paginate a.paginate_active {
+	border: 1px solid #ddd;
+	padding: 6px 12px;
+	margin-right: 5px;
+	cursor: pointer;
+	color: #636E7B;
+	line-height: 21px;
+	float: left;
+	position: relative;
+	background: #fff;
+	display: inline-block;
+	-moz-border-radius: 3px;
+	-webkit-border-radius: 3px;
+	border-radius: 3px;
+}
+
+.dataTables_paginate > li:first-child > a,
+.dataTables_paginate > li:first-child > span {
+	border-bottom-left-radius: 3px;
+	border-top-left-radius: 3px;
+}
+
+.dataTables_paginate a.paginate_button:hover {
+	text-decoration: none !important;
+	background-color: #E4E7EA;
+}
+
+.dataTables_paginate a.current,
+.dataTables_paginate a.current:hover {
+	background-color: #1CAF9A;
+	border-color: #1CAF9A;
+	color: #fff;
+}
+
+.dataTables_paginate a:focus {
+	text-decoration: none;
+}
+
+.dataTables_paginate a.last {
+	margin-right: 0;
 }
 
 /* Two button pagination - previous / next */
@@ -128,7 +178,7 @@
 
 /* Full number pagination */
 .paging_full_numbers {
-	line-height: 22px;
+	line-height: 21px;
 	
 }
 .paging_full_numbers a:active {
@@ -136,48 +186,6 @@
 }
 .paging_full_numbers a:hover {
 	text-decoration: none;
-}
-
-.paging_full_numbers a.paginate_button,
-.paging_full_numbers a.paginate_active {
-	border: 1px solid #ddd;
-	padding: 6px 12px;
-	margin-right: 5px;
-	cursor: pointer;
-	color: #636E7B;
-	line-height: 21px;
-	float: left;
-	position: relative;
-	background: #fff;
-	display: inline-block;
-	-moz-border-radius: 3px;
-	-webkit-border-radius: 3px;
-	border-radius: 3px;
-}
-
-.paging_full_numbers > li:first-child > a,
-.paging_full_numbers > li:first-child > span {
-	border-bottom-left-radius: 3px;
-	border-top-left-radius: 3px;
-}
-
-.paging_full_numbers a.paginate_button:hover {
-	text-decoration: none !important;
-	background-color: #E4E7EA;
-}
-
-.paging_full_numbers a.paginate_active {
-	background-color: #1CAF9A;
-	border-color: #1CAF9A;
-	color: #fff;
-}
-
-.paging_full_numbers a:focus {
-	text-decoration: none;
-}
-
-.paging_full_numbers a.last {
-	margin-right: 0;
 }
 
 .paginate_button_disabled {

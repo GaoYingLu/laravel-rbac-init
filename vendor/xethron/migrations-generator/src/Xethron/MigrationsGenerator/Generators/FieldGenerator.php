@@ -92,9 +92,11 @@ class FieldGenerator {
 			$type = $column->getType()->getName();
 			$length = $column->getLength();
 			$default = $column->getDefault();
+			if (is_bool($default))
+				$default = $default === true ? 1 : 0;
 			$nullable = (!$column->getNotNull());
 			$index = $indexGenerator->getIndex($name);
-
+			$comment = $column->getComment();
 			$decorators = null;
 			$args = null;
 
@@ -146,6 +148,7 @@ class FieldGenerator {
 			if ($nullable) $decorators[] = 'nullable';
 			if ($default !== null) $decorators[] = $this->getDefault($default, $type);
 			if ($index) $decorators[] = $this->decorate($index->type, $index->name);
+			if ($comment) $decorators[] = "comment('" . addcslashes($comment, "\\'") . "')";
 
 			$field = ['field' => $name, 'type' => $type];
 			if ($decorators) $field['decorators'] = $decorators;
@@ -173,7 +176,7 @@ class FieldGenerator {
 	 */
 	protected function getDefault($default, &$type)
 	{
-		if (in_array($default, ['CURRENT_TIMESTAMP'])) {
+		if (in_array($default, ['CURRENT_TIMESTAMP'], true)) {
 			if ($type == 'dateTime')
 				$type = 'timestamp';
 			$default = $this->decorate('DB::raw', $default);
@@ -207,8 +210,10 @@ class FieldGenerator {
 	protected function argsToString($args, $quotes = '\'')
 	{
 		if ( is_array( $args ) ) {
-			$seperator = $quotes .', '. $quotes;
-			$args = implode( $seperator, $args );
+			$separator = $quotes .', '. $quotes;
+			$args = implode($separator, str_replace($quotes, '\\'.$quotes, $args));
+		} else {
+			$args = str_replace($quotes, '\\'.$quotes, $args);
 		}
 
 		return $quotes . $args . $quotes;

@@ -9,10 +9,9 @@ use Way\Generators\Filesystem\Filesystem;
 use Way\Generators\Compilers\TemplateCompiler;
 use Illuminate\Database\Migrations\MigrationRepositoryInterface;
 
-use Way\Generators\Syntax\DroppedTable;
-
 use Xethron\MigrationsGenerator\Generators\SchemaGenerator;
 use Xethron\MigrationsGenerator\Syntax\AddToTable;
+use Xethron\MigrationsGenerator\Syntax\DroppedTable;
 use Xethron\MigrationsGenerator\Syntax\AddForeignKeysToTable;
 use Xethron\MigrationsGenerator\Syntax\RemoveForeignKeysFromTable;
 
@@ -101,7 +100,12 @@ class MigrateGenerateCommand extends GeneratorCommand {
 	 */
 	protected $table;
 
-	/**
+    /**
+     * @var string|null
+     */
+    protected $connection = null;
+
+    /**
 	 * @param \Way\Generators\Generator  $generator
 	 * @param \Way\Generators\Filesystem\Filesystem  $file
 	 * @param \Way\Generators\Compilers\TemplateCompiler  $compiler
@@ -132,6 +136,9 @@ class MigrateGenerateCommand extends GeneratorCommand {
 	public function fire()
 	{
 		$this->info( 'Using connection: '. $this->option( 'connection' ) ."\n" );
+        if ($this->option('connection') !== $this->config->get('database.default')) {
+            $this->connection = $this->option('connection');
+        }
 		$this->schemaGenerator = new SchemaGenerator(
 			$this->option('connection'),
 			$this->option('defaultIndexNames'),
@@ -165,10 +172,10 @@ class MigrateGenerateCommand extends GeneratorCommand {
 
 		$this->info( "Setting up Tables and Index Migrations" );
 		$this->datePrefix = date( 'Y_m_d_His' );
-		$this->generate( 'create', $tables );
+		$this->generateTablesAndIndices( $tables );
 		$this->info( "\nSetting up Foreign Key Migrations\n" );
 		$this->datePrefix = date( 'Y_m_d_His', strtotime( '+1 second' ) );
-		$this->generate( 'foreign_keys', $tables );
+		$this->generateForeignKeys( $tables );
 		$this->info( "\nFinished!\n" );
 	}
 
@@ -180,7 +187,7 @@ class MigrateGenerateCommand extends GeneratorCommand {
 	protected function askYn( $question ) {
 		$answer = $this->ask( $question .' [Y/n] ');
 		while ( ! in_array( strtolower( $answer ), [ 'y', 'n', 'yes', 'no' ] ) ) {
-			$answer = $this->ask('Please choose ether yes or no. ');
+			$answer = $this->ask('Please choose either yes or no. ');
 		}
 		return in_array( strtolower( $answer ), [ 'y', 'yes' ] );
 	}
@@ -211,37 +218,56 @@ class MigrateGenerateCommand extends GeneratorCommand {
 	}
 
 	/**
-	 * Generate Migrations
+	 * Generate tables and index migrations.
 	 *
-	 * @param  string $method Create Tables or Foreign Keys ['create', 'foreign_keys']
-	 * @param  array  $tables List of tables to create migrations for
-	 * @throws MethodNotFoundException
+	 * @param  array $tables List of tables to create migrations for
 	 * @return void
 	 */
-	protected function generate( $method, $tables )
+	protected function generateTablesAndIndices( array $tables )
 	{
-		if ( $method == 'create' ) {
-			$function = 'getFields';
-			$prefix = 'create';
-		} elseif ( $method = 'foreign_keys' ) {
-			$function = 'getForeignKeyConstraints';
-			$prefix = 'add_foreign_keys_to';
-			$method = 'table';
-		} else {
-			throw new MethodNotFoundException( $method );
-		}
+		$this->method = 'create';
 
 		foreach ( $tables as $table ) {
-			$this->migrationName = $prefix .'_'. $table .'_table';
-			$this->method = $method;
 			$this->table = $table;
-			$this->fields = $this->schemaGenerator->{$function}( $table );
-			if ( $this->fields ) {
-				parent::fire();
-				if ( $this->log ) {
-					$file = $this->datePrefix . '_' . $this->migrationName;
-					$this->repository->log($file, $this->batch);
-				}
+			$this->migrationName = 'create_'. $this->table .'_table';
+			$this->fields = $this->schemaGenerator->getFields( $this->table );
+			
+			$this->generate();
+		}
+	}
+
+	/**
+	 * Generate foreign key migrations.
+	 *
+	 * @param  array $tables List of tables to create migrations for
+	 * @return void
+	 */
+	protected function generateForeignKeys( array $tables )
+	{
+		$this->method = 'table';
+
+		foreach ( $tables as $table ) {
+			$this->table = $table;
+			$this->migrationName = 'add_foreign_keys_to_'. $this->table .'_table';
+			$this->fields = $this->schemaGenerator->getForeignKeyConstraints( $this->table );
+
+			$this->generate();
+		}
+	}
+
+	/**
+	 * Generate Migration for the current table.
+	 *
+	 * @return void
+	 */
+	protected function generate()
+	{
+		if ( $this->fields ) {
+			parent::fire();
+
+			if ( $this->log ) {
+				$file = $this->datePrefix . '_' . $this->migrationName;
+				$this->repository->log($file, $this->batch);
 			}
 		}
 	}
@@ -254,7 +280,8 @@ class MigrateGenerateCommand extends GeneratorCommand {
 	protected function getFileGenerationPath()
 	{
 		$path = $this->getPathByOptionOrConfig( 'path', 'migration_target_path' );
-		$fileName = $this->getDatePrefix() . '_' . $this->migrationName . '.php';
+		$migrationName = str_replace('/', '_', $this->migrationName);
+		$fileName = $this->getDatePrefix() . '_' . $migrationName . '.php';
 
 		return "{$path}/{$fileName}";
 	}
@@ -277,11 +304,13 @@ class MigrateGenerateCommand extends GeneratorCommand {
 	protected function getTemplateData()
 	{
 		if ( $this->method == 'create' ) {
-			$up = (new AddToTable($this->file, $this->compiler))->run($this->fields, $this->table, 'create');
-			$down = (new DroppedTable)->drop($this->table);
-		} else {
-			$up = (new AddForeignKeysToTable($this->file, $this->compiler))->run($this->fields,$this->table);
-			$down = (new RemoveForeignKeysFromTable($this->file, $this->compiler))->run($this->fields,$this->table);
+			$up = (new AddToTable($this->file, $this->compiler))->run($this->fields, $this->table, $this->connection, 'create');
+			$down = (new DroppedTable)->drop($this->table, $this->connection);
+		}
+
+		if ( $this->method == 'table' ) {
+			$up = (new AddForeignKeysToTable($this->file, $this->compiler))->run($this->fields, $this->table, $this->connection);
+			$down = (new RemoveForeignKeysFromTable($this->file, $this->compiler))->run($this->fields, $this->table, $this->connection);
 		}
 
 		return [
@@ -334,11 +363,11 @@ class MigrateGenerateCommand extends GeneratorCommand {
 	/**
 	 * Remove all the tables to exclude from the array of tables
 	 *
-	 * @param $tables
+	 * @param array $tables
 	 *
 	 * @return array
 	 */
-	protected function removeExcludedTables($tables)
+	protected function removeExcludedTables( array $tables )
 	{
 		$excludes = $this->getExcludedTables();
 		$tables = array_diff($tables, $excludes);

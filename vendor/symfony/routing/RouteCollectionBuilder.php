@@ -111,6 +111,7 @@ class RouteCollectionBuilder
     /**
      * Add a RouteCollectionBuilder.
      *
+     * @param string                 $prefix
      * @param RouteCollectionBuilder $builder
      */
     public function mount($prefix, RouteCollectionBuilder $builder)
@@ -169,7 +170,7 @@ class RouteCollectionBuilder
 
     /**
      * Sets a default value that will be added to all embedded routes (unless that
-     * default value is already set.
+     * default value is already set).
      *
      * @param string $key
      * @param mixed  $value
@@ -185,7 +186,7 @@ class RouteCollectionBuilder
 
     /**
      * Sets a requirement that will be added to all embedded routes (unless that
-     * requirement is already set.
+     * requirement is already set).
      *
      * @param string $key
      * @param mixed  $regex
@@ -201,7 +202,7 @@ class RouteCollectionBuilder
 
     /**
      * Sets an opiton that will be added to all embedded routes (unless that
-     * option is already set.
+     * option is already set).
      *
      * @param string $key
      * @param mixed  $value

@@ -14,9 +14,9 @@ namespace Tracy;
  */
 class DefaultBarPanel implements IBarPanel
 {
-	private $id;
-
 	public $data;
+
+	private $id;
 
 
 	public function __construct($id)
@@ -31,7 +31,7 @@ class DefaultBarPanel implements IBarPanel
 	 */
 	public function getTab()
 	{
-		ob_start();
+		ob_start(function () {});
 		$data = $this->data;
 		require __DIR__ . "/assets/Bar/{$this->id}.tab.phtml";
 		return ob_get_clean();
@@ -44,12 +44,11 @@ class DefaultBarPanel implements IBarPanel
 	 */
 	public function getPanel()
 	{
-		ob_start();
+		ob_start(function () {});
 		if (is_file(__DIR__ . "/assets/Bar/{$this->id}.panel.phtml")) {
 			$data = $this->data;
 			require __DIR__ . "/assets/Bar/{$this->id}.panel.phtml";
 		}
 		return ob_get_clean();
 	}
-
 }

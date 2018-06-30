@@ -73,16 +73,6 @@ class BaseLogic{
 
     }
 
-    /**
-     * @param int $page
-     * @param int $size
-     * @return mixed
-     * @desc 生成offset值
-     */
-    public static function getOffset($page=1, $size=10){
 
-        return max( ($page - 1), 1 ) * $size;
-
-    }
     
 }

@@ -3,6 +3,7 @@ namespace Barryvdh\Debugbar\DataCollector;
 
 use DebugBar\DataCollector\TimeDataCollector;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\DataCollector\Util\ValueExporter;
 
 class EventCollector extends TimeDataCollector
@@ -20,13 +21,18 @@ class EventCollector extends TimeDataCollector
         $this->exporter = new ValueExporter();
     }
 
-    public function onWildcardEvent()
+    public function onWildcardEvent($name = null, $data = [])
     {
-        $name = $this->events->firing();
-        $time = microtime(true);
+        // Pre-Laravel 5.4, using 'firing' to get the current event name.
+        if (method_exists($this->events, 'firing')) {
+            $name = $this->events->firing();
 
-        // Get the arguments passed to the event
-        $params = $this->prepareParams(func_get_args());
+            // Get the arguments passed to the event
+            $data = func_get_args();
+        }
+
+        $params = $this->prepareParams($data);
+        $time = microtime(true);
 
         // Find all listeners for the current event
         foreach ($this->events->getListeners($name) as $i => $listener) {
@@ -68,13 +74,16 @@ class EventCollector extends TimeDataCollector
     public function subscribe(Dispatcher $events)
     {
         $this->events = $events;
-        $events->listen('*', array($this, 'onWildcardEvent'));
+        $events->listen('*', [$this, 'onWildcardEvent']);
     }
 
     protected function prepareParams($params)
     {
-        $data = array();
+        $data = [];
         foreach ($params as $key => $value) {
+            if (is_object($value) && Str::is('Illuminate\*\Events\*', get_class($value))) {
+                $value =  $this->prepareParams(get_object_vars($value));
+            }
             $data[$key] = htmlentities($this->exporter->exportValue($value), ENT_QUOTES, 'UTF-8', false);
         }
 
@@ -96,17 +105,17 @@ class EventCollector extends TimeDataCollector
 
     public function getWidgets()
     {
-        return array(
-          "events" => array(
+        return [
+          "events" => [
             "icon" => "tasks",
             "widget" => "PhpDebugBar.Widgets.TimelineWidget",
             "map" => "event",
             "default" => "{}",
-          ),
-          'events:badge' => array(
+          ],
+          'events:badge' => [
             'map' => 'event.nb_measures',
             'default' => 0,
-          ),
-        );
+          ],
+        ];
     }
 }

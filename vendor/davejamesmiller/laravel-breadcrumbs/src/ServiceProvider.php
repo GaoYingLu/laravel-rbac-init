@@ -31,7 +31,7 @@ class ServiceProvider extends BaseServiceProvider {
 	 */
 	public function register()
 	{
-		$this->app['breadcrumbs'] = $this->app->share(function($app)
+        $this->app->singleton('breadcrumbs', function ($app)
 		{
 			$breadcrumbs = $this->app->make('DaveJamesMiller\Breadcrumbs\Manager');
 
@@ -67,8 +67,14 @@ class ServiceProvider extends BaseServiceProvider {
 	// This method can be overridden in a child class
 	public function registerBreadcrumbs()
 	{
-		// Load the app breadcrumbs if they're in app/Http/breadcrumbs.php
-		if (file_exists($file = $this->app['path'].'/Http/breadcrumbs.php'))
+		// Load the app breadcrumbs if they're in routes/breadcrumbs.php (Laravel 5.3)
+		if (file_exists($file = $this->app['path.base'].'/routes/breadcrumbs.php'))
+		{
+			require $file;
+		}
+
+		// Load the app breadcrumbs if they're in app/Http/breadcrumbs.php (Laravel 5.0-5.2)
+		elseif (file_exists($file = $this->app['path'].'/Http/breadcrumbs.php'))
 		{
 			require $file;
 		}
