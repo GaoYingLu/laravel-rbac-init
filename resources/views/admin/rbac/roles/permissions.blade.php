@@ -7,10 +7,7 @@
 
         }
     </style>
-    <div class="pageheader">
-        <h2><i class="fa fa-home"></i> Dashboard <span>系统设置</span></h2>
-        {!! Breadcrumbs::render('admin-role-permission') !!}
-    </div>
+
 
     <div class="contentpanel">
 

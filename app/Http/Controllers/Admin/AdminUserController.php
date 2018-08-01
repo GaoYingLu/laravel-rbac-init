@@ -41,8 +41,11 @@ class AdminUserController extends BaseController
             $breadcrumbs->push('用户列表', route('admin.admin_user.index'));
         });
 
+        $title = '用户列表';
+        $breadcrumbsName = 'admin-user-index';
+
         $users = $this->adminUser->paginate(10);
-        return view('admin.rbac.admin_users.index', compact('users'));
+        return view('admin.rbac.admin_users.index', compact('users', 'title', 'breadcrumbsName'));
     }
 
     /**

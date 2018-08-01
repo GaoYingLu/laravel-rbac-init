@@ -46,7 +46,6 @@ class BaseLogic{
     {
 
         return [
-            'status'    => true,
             'code'      => self::CODE_SUCCESS,
             'msg'       => $msg,
             'data'      => empty($data) ? '' : $data
@@ -65,7 +64,6 @@ class BaseLogic{
     {
 
         return [
-            'status'    => false,
             'code'      => $code,
             'msg'       => $msg,
             'data'      => empty($data) ? '' : $data

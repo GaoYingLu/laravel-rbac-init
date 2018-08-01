@@ -1,10 +1,6 @@
 @extends('layouts.admin-app')
 
 @section('content')
-    <div class="pageheader">
-        <h2><i class="fa fa-home"></i> Dashboard <span>系统设置</span></h2>
-        {!! Breadcrumbs::render('admin-user-create') !!}
-    </div>
 
     <div class="contentpanel panel-email">
 

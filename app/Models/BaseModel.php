@@ -13,25 +13,25 @@ use Illuminate\Database\Eloquent\Model;
 
 class BaseModel extends Model{
 
-    public static $defaultNameSpace = ExceptionCodeModel::EXP_MODEL_BASE;
-
-    public static $codeArr = [];
-    
-    protected static function getFinalCode($errorText='')
-    {
-
-        $codeExt = isset(static::$codeArr[$errorText]) ? static::$codeArr[$errorText] : 0;
-
-        if( isset(static::$expNameSpace)  ){
-
-            return static::$expNameSpace + $codeExt;
-
-        }else{
-
-            return self::$defaultNameSpace;
-
+    public function scopeId($query, $id){
+        if (!$id) {
+            return $query;
         }
+        return $query->where('id', $id);
+    }
 
+    public function scopeIds($query, $ids){
+        if (!$ids) {
+            return $query;
+        }
+        return $query->whereIn('id', $ids);
+    }
+
+    public function scopeCategoryId($query, $categoryId){
+        if (!$categoryId) {
+            return $query;
+        }
+        return $query->where('category_id', $categoryId);
     }
     
 }
