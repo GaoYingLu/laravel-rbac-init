@@ -18,6 +18,18 @@ class SystemConfig extends BaseModel{
 
     END = 0;
 
+    public static function getList($key='', $status='', $size = 10)
+    {
+        $model = new SystemConfig();
+        if ($key) {
+            $model = $model->where('config_key_md5', self::getSecurityKey($key));
+        }
+        if ($status) {
+            $model = $model->where('status', $status);
+        }
+        return $model->orderBy('id', 'desc')->paginate($size);
+    }
+
     public static function addInfo($key, $value, $status=self::STATUS_COMMON)
     {
         $data = [
@@ -74,6 +86,14 @@ class SystemConfig extends BaseModel{
             Cache::forget($key);
         }
         return Cache::put($key, $value);
+    }
+
+    protected static function getSecurityKey($key)
+    {
+        if (empty($key)) {
+            return false;
+        }
+        return md5($key);
     }
 
 

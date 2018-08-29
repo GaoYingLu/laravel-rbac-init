@@ -61,7 +61,7 @@ class ExpCode
         $msg = isset($errorArr[$code]) ? $errorArr[$code] : $errorArr[self::ERROR_DEFAULT];
         $param  = is_array($param) ? $param : [$param];
 
-        return vsprintf($msg, $param);
+        return !empty($param) ? vsprintf($msg, $param) : $msg;
     }
 
 

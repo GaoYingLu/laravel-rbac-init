@@ -8,7 +8,9 @@
 
 namespace App\Logics;
 
+use App\Models\ExpCode;
 use Illuminate\Support\Facades\DB;
+use Mockery\Exception;
 
 class BaseLogic{
 
@@ -17,8 +19,8 @@ class BaseLogic{
      * @todo 不同的业务场景，可以定义不同code
      */
     const
-        CODE_SUCCESS        = 200,  //成功
-        CODE_ERROR          = 500;  //失败
+        CODE_SUCCESS        = 2000,  //成功
+        CODE_ERROR          = 5000;  //失败
 
 
     public static function beginTransaction()
@@ -70,6 +72,102 @@ class BaseLogic{
         ];
 
     }
+
+    public static function ensureNull($result, $errno, $args = array())
+    {
+        if (! is_null($result)) {
+            self::throwBaseException($errno, $args);
+        }
+
+        return $result;
+    }
+
+    public static function ensureNotNull($result, $errno, $args = array())
+    {
+        if (is_null($result)) {
+            self::throwBaseException($errno, $args);
+        }
+
+        return $result;
+    }
+
+    public static function ensureNotEmpty($result, $errno, $args = array())
+    {
+        if (empty($result)) {
+            self::throwBaseException($errno, $args);
+        }
+
+        return $result;
+    }
+
+    public static function ensureEmpty($result, $errno, $args = array())
+    {
+        if (! empty($result)) {
+            self::throwBaseException($errno, $args);
+        }
+
+        return $result;
+    }
+
+    public static function ensureArray($result, $errno, $args = array())
+    {
+        if (! is_array($result)) {
+            self::throwBaseException($errno, $args);
+        }
+
+        return $result;
+    }
+
+    public static function ensureNotFalse($result, $errno, $args = array())
+    {
+        if ($result === false) {
+            self::throwBaseException($errno, $args);
+        }
+
+        return $result;
+    }
+
+    public static function ensureFalse($result, $errno, $args = array())
+    {
+        if ($result !== false) {
+            self::throwBaseException($errno, $args);
+        }
+
+        return $result;
+    }
+
+    public static function ensureJson($string, $errno, $args = array())
+    {
+        json_decode($string, true);
+        if (!json_last_error() == JSON_ERROR_NONE) {
+            self::throwBaseException($errno, $args);
+        }
+        return $string;
+    }
+
+    public static function ensureIsPhone($phone, $errno, $args = array()){
+
+        $pattern    = '/^(13\d|14[57]|15[012356789]|18\d|17[0135678])\d{8}$/';
+        if(!preg_match($pattern, $phone)) {
+            self::throwBaseException($errno, $args);
+        }
+        return $phone;
+    }
+
+    public static function ensureIsSetAndNotEmpty($arr, $k, $errno, $args = array())
+    {
+        if (isset($arr[$k]) && !empty($arr[$k])) {
+            return $arr[$k];
+        } else {
+            self::throwBaseException($errno, $args);
+        }
+    }
+
+    public static function throwBaseException($errno, $args)
+    {
+        throw new Exception(ExpCode::getErrorMessage($errno, $args), $errno);
+    }
+
 
 
     
